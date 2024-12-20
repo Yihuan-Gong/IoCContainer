@@ -4,13 +4,14 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using IoCContainer;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MVPExtension
 {
-    public class AutomaticRegistration
+    public static class IServiceCollectionExtension
     {
-        public void RegisterAllViewsAndPresenters()
+        public static void RegisterAllViewsAndPresenters(this IServiceCollection serviceCollection)
         {
             // 從目前執行的組件中取得所有型別，假設僅掃描本執行組件。
             var assemblies = new[] { Assembly.GetExecutingAssembly() };
@@ -31,7 +32,7 @@ namespace MVPExtension
                 // 理由：
                 // 如果使用者已手動透過 Service.AddTransit<TInterface, TImplementation>() 註冊此契約，
                 // 則不應再進行自動註冊，避免覆蓋使用者的決定或造成重複註冊。
-                bool alreadyRegistered = Service.ServiceCollection.Any(d => d.ServiceType == contractType);
+                bool alreadyRegistered = serviceCollection.Any(d => d.ServiceType == contractType);
 
                 // 若此契約已手動註冊，直接略過自動註冊的步驟
                 if (alreadyRegistered)
@@ -50,7 +51,7 @@ namespace MVPExtension
                 // 若有找到，則對每個實作類別進行註冊
                 foreach (var implType in implementations)
                 {
-                    Service.AddTransit(contractType, implType);
+                    serviceCollection.TryAdd(ServiceDescriptor.Transient(contractType, implType));
                 }
             }
         }
@@ -63,7 +64,7 @@ namespace MVPExtension
         /// <param name="contractType"></param>
         /// <param name="typeToCheck"></param>
         /// <returns></returns>
-        private bool IsImplementationOfContractType(Type contractType, Type typeToCheck)
+        private static bool IsImplementationOfContractType(Type contractType, Type typeToCheck)
         {
             // 檢查 openGenericType 是否為開放泛型定義
             // 若 openGenericType 不是開放泛型定義，則可直接使用 IsAssignableFrom 判斷繼承與實作關係

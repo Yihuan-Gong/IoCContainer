@@ -10,8 +10,6 @@ namespace MVPExtension
     {
         static void Main(string[] args)
         {
-
-
         }
     }
 }

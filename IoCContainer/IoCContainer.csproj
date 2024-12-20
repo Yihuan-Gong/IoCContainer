@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{BD5011C8-6E0B-4181-9668-C3F93FD29C5A}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>IoCContainer</RootNamespace>
     <AssemblyName>IoCContainer</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -97,10 +97,9 @@
     <Compile Include="Extensions\TypeExtension.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Service.cs" />
     <Compile Include="ServiceDescriptorEnumerator.cs" />
-    <Compile Include="YiHuanServiceCollection.cs" />
-    <Compile Include="YiHuanServiceProvider.cs" />
+    <Compile Include="ServiceCollection.cs" />
+    <Compile Include="ServiceProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -109,13 +108,9 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>cd ../..
-set BuildingInsidePostBuildEvent=""
-if "$(BuildingInsidePostBuildEvent)"=="" (
-    set BuildingInsidePostBuildEvent=true
-    "C:\Program Files\dotnet\dotnet.exe" build "$(ProjectPath)" --configuration Release /p:OutputType=Library
-    if not exist "D:\Libraries\dll\$(SolutionName)\$(ProjectName)" mkdir "D:\Libraries\dll\$(SolutionName)\$(ProjectName)"
-    copy /Y ".\bin\Release\*.dll" "D:\Libraries\dll\$(SolutionName)\$(ProjectName)"
-)
+
+if not exist "D:\Libraries\dll\$(SolutionName)\$(ProjectName)" mkdir "D:\Libraries\dll\$(SolutionName)\$(ProjectName)"
+copy /Y ".\bin\Debug\*.dll" "D:\Libraries\dll\$(SolutionName)\$(ProjectName)"
 </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>

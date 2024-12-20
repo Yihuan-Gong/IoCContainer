@@ -9,11 +9,11 @@ namespace IoCContainer
 {
     public static class IServiceProviderExtension
     {
-        public static Tparent GetService<Tparent>(this IServiceProvider serviceProvider)
-        {
-            object result = serviceProvider.GetService(typeof(Tparent));
+        //public static Tparent GetService<Tparent>(this IServiceProvider serviceProvider)
+        //{
+        //    object result = serviceProvider.GetService(typeof(Tparent));
 
-            return (Tparent)result;
-        }
+        //    return (Tparent)result;
+        //}
     }
 }

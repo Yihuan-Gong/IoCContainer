@@ -4,24 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using IoCContainer;
 
 namespace MVPExtension
 {
-    public class PresenterFactory
+    public static class IServiceProviderExtension
     {
-        private readonly IServiceProvider _serviceProvider;
-        
-        public PresenterFactory(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
-
-        public TPresenter Create<TPresenter, TView>(TView view)
+        public static TPresenter CreatePresenter<TPresenter, TView>(this IServiceProvider serviceProvider, TView view)
             where TPresenter : class
             where TView : class
         {
-            var implementationType = GetImplementationType<TPresenter>();
+            var implementationType = GetImplementationType<TPresenter>(serviceProvider);
             if (implementationType == null)
             {
                 throw new InvalidOperationException($"No implementation type registered for {typeof(TPresenter).FullName}");
@@ -57,7 +49,7 @@ namespace MVPExtension
                     {
                         // 嘗試從容器取得服務
                         // 如果使用您的自製容器，請在此改為對您的容器呼叫類似 GetService 方法。
-                        var service = _serviceProvider.GetService(paramType);
+                        var service = serviceProvider.GetService(paramType);
 
                         if (service == null)
                         {
@@ -84,10 +76,12 @@ namespace MVPExtension
             );
         }
 
-        private Type GetImplementationType<TInterface>()
+        private static Type GetImplementationType<TInterface>(IServiceProvider serviceProvider)
         {
+            var serviceCollection = serviceProvider.GetService<IServiceCollection>();
+            
             // 先嘗試直接尋找完全匹配的註冊（非泛型或已關閉泛型正好註冊）
-            var directDescriptor = Service.ServiceCollection.FirstOrDefault(
+            var directDescriptor = serviceCollection.FirstOrDefault(
                 s => s.ServiceType == typeof(TInterface));
             if (directDescriptor != null)
             {
@@ -102,7 +96,7 @@ namespace MVPExtension
                 var genericDef = interfaceType.GetGenericTypeDefinition();
 
                 // 在容器中尋找是否有開放泛型的註冊（例如 IItemBoxPresenter<,> 對應 ItemBoxPresenter<,>）
-                var openGenericDescriptor = Service.ServiceCollection.FirstOrDefault(
+                var openGenericDescriptor = serviceCollection.FirstOrDefault(
                     s => s.ServiceType.IsGenericTypeDefinition && s.ServiceType == genericDef);
 
                 if (openGenericDescriptor != null)
@@ -130,7 +124,7 @@ namespace MVPExtension
             return null;
         }
 
-        private Type GetDescriptorImplementationType(ServiceDescriptor descriptor, Type interfaceType)
+        private static Type GetDescriptorImplementationType(ServiceDescriptor descriptor, Type interfaceType)
         {
             if (descriptor.ImplementationType != null)
             {

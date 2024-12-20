@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{A7B3B565-B3DE-4B12-A928-9FD198D91515}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>MVPExtension</RootNamespace>
     <AssemblyName>MVPExtension</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -61,8 +61,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutomaticRegistration.cs" />
-    <Compile Include="PresenterFactory.cs" />
+    <Compile Include="Extensions\IServiceCollectionExtension.cs" />
+    <Compile Include="Extensions\IServiceProviderExtension.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -79,13 +79,9 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>cd ../..
-set BuildingInsidePostBuildEvent=""
-if "$(BuildingInsidePostBuildEvent)"=="" (
-    set BuildingInsidePostBuildEvent=true
-    "C:\Program Files\dotnet\dotnet.exe" build "$(ProjectPath)" --configuration Release /p:OutputType=Library
-    if not exist "D:\Libraries\dll\$(SolutionName)\$(ProjectName)" mkdir "D:\Libraries\dll\$(SolutionName)\$(ProjectName)"
-    copy /Y ".\bin\Release\*.dll" "D:\Libraries\dll\$(SolutionName)\$(ProjectName)"
-)
+
+if not exist "D:\Libraries\dll\$(SolutionName)\$(ProjectName)" mkdir "D:\Libraries\dll\$(SolutionName)\$(ProjectName)"
+copy /Y ".\bin\Debug\*.dll" "D:\Libraries\dll\$(SolutionName)\$(ProjectName)"
 </PostBuildEvent>
   </PropertyGroup>
 </Project>

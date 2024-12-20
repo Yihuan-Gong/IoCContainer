@@ -11,14 +11,14 @@ namespace IoCContainer
 {
     internal class ServiceDescriptorEnumerator : IEnumerator<ServiceDescriptor>
     {
-        private YiHuanServiceCollection _serviceCollection;
+        private ServiceCollection _serviceCollection;
         private int _index = -1;
 
         public ServiceDescriptor Current => _serviceCollection[_index];
 
         object IEnumerator.Current => throw new NotImplementedException();
 
-        public ServiceDescriptorEnumerator(YiHuanServiceCollection serviceCollection)
+        public ServiceDescriptorEnumerator(ServiceCollection serviceCollection)
         {
             _serviceCollection = serviceCollection;
         }

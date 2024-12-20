@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,9 @@ namespace IoCContainer
     {
         public static bool IsEnumerable(this Type type)
         {
+            if (type == typeof(IServiceCollection)) 
+                return false;
+
             return typeof(IEnumerable).IsAssignableFrom(type);
         }
     }

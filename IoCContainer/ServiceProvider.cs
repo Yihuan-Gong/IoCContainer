@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace IoCContainer
 {
-    public class YiHuanServiceProvider : IServiceProvider
+    public class ServiceProvider : IServiceProvider
     {
         private readonly Dictionary<Type, List<ServiceDescriptor>> _typeServiceDescriptorDict;
 
-        public YiHuanServiceProvider(Dictionary<Type, List<ServiceDescriptor>> typeServiceDescriptorDict)
+        public ServiceProvider(Dictionary<Type, List<ServiceDescriptor>> typeServiceDescriptorDict)
         {
             _typeServiceDescriptorDict = typeServiceDescriptorDict;
         }
