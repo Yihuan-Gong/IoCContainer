@@ -14,7 +14,9 @@ namespace MVPExtension
         public static void RegisterAllViewsAndPresenters(this IServiceCollection serviceCollection)
         {
             // 從目前執行的組件中取得所有型別，假設僅掃描本執行組件。
-            var assemblies = new[] { Assembly.GetExecutingAssembly() };
+            //var assemblies = new[] { Assembly.GetExecutingAssembly() };
+            //var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var assemblies = new[] { Assembly.GetEntryAssembly() };
 
             // 將所有組件中的型別彙整成單一清單，以便後續進行篩選和分析
             var types = assemblies.SelectMany(a => a.GetTypes()).ToList();
