@@ -101,7 +101,10 @@ namespace IoCContainer
             // 將IServiceCollection也加入容器裡面
             Add(ServiceDescriptor.Singleton(typeof(IServiceCollection), this));
 
-            return new ServiceProvider(_typeServiceDescriptorDict);
+            var serviceProvider = new ServiceProvider(_typeServiceDescriptorDict);
+            Add(ServiceDescriptor.Singleton(typeof(IServiceProvider), serviceProvider));
+
+            return serviceProvider;
         }
 
         public void Clear()
