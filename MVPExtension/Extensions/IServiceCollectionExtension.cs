@@ -1,25 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Newtonsoft.Json;
 
 namespace MVPExtension
 {
     public static class IServiceCollectionExtension
     {
-        public static void RegisterAllViewsAndPresenters(this IServiceCollection serviceCollection)
+        public static void RegisterAllViewsAndPresenters(this IServiceCollection serviceCollection, string configPath)
         {
-            // 從目前執行的組件中取得所有型別，假設僅掃描本執行組件。
-            //var assemblies = new[] { Assembly.GetExecutingAssembly() };
-            //var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            var assemblies = new[] { Assembly.GetEntryAssembly() };
-
-            // 將所有組件中的型別彙整成單一清單，以便後續進行篩選和分析
-            var types = assemblies.SelectMany(a => a.GetTypes()).ToList();
+            // 先根據config進行手動註冊
+            ManualRegistration(serviceCollection, configPath);
+            
+            // 從程式進入點的assembly中，拿出所有的type
+            var types = GetNecessaryAssembly().GetTypes().ToList();
 
             // 篩選出所有可作為契約（介面或抽象類別）的型別，
             // 並且其名稱以 "View" 或 "Presenter" 結尾。
@@ -31,9 +32,6 @@ namespace MVPExtension
             foreach (var contractType in contractTypes)
             {
                 // 在自動註冊之前，我們先檢查此契約型別是否已由使用者手動指定實作類型。
-                // 理由：
-                // 如果使用者已手動透過 Service.AddTransit<TInterface, TImplementation>() 註冊此契約，
-                // 則不應再進行自動註冊，避免覆蓋使用者的決定或造成重複註冊。
                 bool alreadyRegistered = serviceCollection.Any(d => d.ServiceType == contractType);
 
                 // 若此契約已手動註冊，直接略過自動註冊的步驟
@@ -58,14 +56,37 @@ namespace MVPExtension
             }
         }
 
-        /// <summary>
-        /// 此方法用來判斷 typeToCheck 是否為 contractType 的實作類別。
-        /// 當 openGenericType 是開放泛型定義時（如 ASearchView<,>），
-        /// 無法直接使用 IsAssignableFrom，須手動沿繼承鏈或介面清單尋找相符的開放泛型定義。
-        /// </summary>
-        /// <param name="contractType"></param>
-        /// <param name="typeToCheck"></param>
-        /// <returns></returns>
+        private static void ManualRegistration(IServiceCollection serviceCollection, string configPath)
+        {
+            string jsonString = File.ReadAllText(configPath);
+            var mvpConfig  = JsonConvert.DeserializeObject<MvpConfig>(jsonString);
+
+            foreach (MvpRegistrationConfig mvpRegistrationConfig in mvpConfig.ServiceDescriptors)
+            {
+                Type serviceType = GetType(mvpRegistrationConfig.ServiceType);
+                Type implementationType = GetType(mvpRegistrationConfig.ImplementationType);
+                serviceCollection.TryAdd(new ServiceDescriptor(serviceType, implementationType, mvpRegistrationConfig.LifeTime));
+            }
+        }
+
+        private static Type GetType(string typeName)
+        {
+            return GetNecessaryAssembly().GetType(typeName);
+        }
+
+
+        private static Assembly GetNecessaryAssembly()
+        {
+            return Assembly.GetEntryAssembly();
+            // var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            // var assemblies = new[] { Assembly.GetExecutingAssembly() };
+        }
+
+
+
+        // 此方法用來判斷 typeToCheck 是否為 contractType 的實作類別。
+        // 當 openGenericType 是開放泛型定義時（如 ASearchView<,>），
+        // 無法直接使用 IsAssignableFrom，須手動沿繼承鏈或介面清單尋找相符的開放泛型定義。
         private static bool IsImplementationOfContractType(Type contractType, Type typeToCheck)
         {
             // 檢查 openGenericType 是否為開放泛型定義
@@ -103,5 +124,9 @@ namespace MVPExtension
             // 若經上述檢查都無法找到相符的定義，表示 typeToCheck 並非 contractType 的實作
             return false;
         }
+
+        //  Type type = Type.GetType("Presenter`1[namespace.type") 
+        //  type.IsGenericType => true/false
+        //  type.MakeGenericType(new object [] {typeof(xxxx),typeof(yyyy)})
     }
 }
