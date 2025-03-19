@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json;
@@ -18,9 +15,11 @@ namespace MVPExtension
         {
             // 先根據config進行手動註冊
             ManualRegistration(serviceCollection, configPath);
-            
+
             // 從程式進入點的assembly中，拿出所有的type
-            var types = GetNecessaryAssembly().GetTypes().ToList();
+            var types = GetNecessaryAssemblies()
+                .Select(x => x.GetTypes().ToList())
+                .SelectMany(x => x).ToList();
 
             // 篩選出所有可作為契約（介面或抽象類別）的型別，
             // 並且其名稱以 "View" 或 "Presenter" 結尾。
@@ -71,14 +70,23 @@ namespace MVPExtension
 
         private static Type GetType(string typeName)
         {
-            return GetNecessaryAssembly().GetType(typeName);
+            //return GetNecessaryAssemblies().GetType(typeName);
+            foreach (Assembly assembly in GetNecessaryAssemblies())
+            {
+                var type = assembly.GetType(typeName);
+                if (type != null)
+                    return type;
+            }
+            return null; // 若找不到型別，回傳 null
         }
 
 
-        private static Assembly GetNecessaryAssembly()
+        private static List<Assembly> GetNecessaryAssemblies()
         {
-            return Assembly.GetEntryAssembly();
-            // var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            //var assembly = Assembly.GetEntryAssembly();
+            //var types = assembly.GetTypes().ToList();
+            //return assembly;
+            return AppDomain.CurrentDomain.GetAssemblies().ToList();
             // var assemblies = new[] { Assembly.GetExecutingAssembly() };
         }
 

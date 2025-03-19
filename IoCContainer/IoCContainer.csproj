@@ -93,7 +93,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions\IServiceProviderExtension.cs" />
+    <Compile Include="Attributes\SingletonAttribute.cs" />
+    <Compile Include="Attributes\TransientAttribute.cs" />
+    <Compile Include="Extensions\IServiceCollectionExtension.cs" />
     <Compile Include="Extensions\TypeExtension.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

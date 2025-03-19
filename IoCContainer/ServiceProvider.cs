@@ -193,14 +193,16 @@ namespace IoCContainer
                 }
             }
 
-            // 若無法解析有參數的建構函式，則使用無參數建構函式
-            var noParamCtor = ctors.FirstOrDefault(c => c.GetParameters().Length == 0);
-            if (noParamCtor != null)
-            {
-                return Activator.CreateInstance(type);
-            }
-
             return null;
+
+            // 若無法解析有參數的建構函式，則使用無參數建構函式
+            //var noParamCtor = ctors.FirstOrDefault(c => c.GetParameters().Length == 0);
+            //if (noParamCtor != null)
+            //{
+            //    return Activator.CreateInstance(type);
+            //}
+
+            //return null;
             //throw new InvalidOperationException($"No suitable constructor found for type {type}");
         }
     }

@@ -12,5 +12,6 @@ namespace MVPExtension
         public string ServiceType { get; set; }
         public string ImplementationType { get; set; }
         public ServiceLifetime LifeTime { get; set; }
+        
     }
 }
