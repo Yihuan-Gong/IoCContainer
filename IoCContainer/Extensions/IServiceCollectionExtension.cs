@@ -26,19 +26,20 @@ namespace IoCContainer.Extensions
             foreach (var type in types)
             {
                 var serviceTypes = GetServiceTypes(type);
-                if (type.GetCustomAttribute<SingletonAttribute>() != null)
+                foreach (var serviceType in serviceTypes)
                 {
-                    foreach (var serviceType in serviceTypes)
+                    if (IsServiceRegistered(services, serviceType, type))
+                        continue;
+                        
+                    if (type.GetCustomAttribute<SingletonAttribute>() != null)
                     {
                         services.AddSingleton(serviceType, type);
                     }
-                }
-                else if (type.GetCustomAttribute<TransientAttribute>() != null)
-                {
-                    foreach (var serviceType in serviceTypes)
+                    else if (type.GetCustomAttribute<TransientAttribute>() != null)
                     {
                         services.AddTransient(serviceType, type);
                     }
+                    
                 }
             }
             return services;
@@ -55,6 +56,11 @@ namespace IoCContainer.Extensions
             }
             serviceTypes.AddRange(implementationType.GetInterfaces());
             return serviceTypes;
+        }
+
+        private static bool IsServiceRegistered(IServiceCollection services, Type serviceType, Type implementationType)
+        {
+            return services.Any(s => s.ServiceType == serviceType && s.ImplementationType == implementationType);
         }
     }
 }

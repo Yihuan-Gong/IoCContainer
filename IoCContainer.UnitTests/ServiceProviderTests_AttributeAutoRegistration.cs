@@ -20,6 +20,7 @@ namespace IoCContainer.UnitTests
         {
             _serviceCollection = new ServiceCollection();
             _serviceCollection.RegisterServicesByAttribute();
+            _serviceCollection.RegisterServicesByAttribute();
             _serviceProvider = _serviceCollection.BuildServiceProvider();
         }
 
